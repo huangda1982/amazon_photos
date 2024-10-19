@@ -47,9 +47,13 @@ class AmazonPhotos:
     def __init__(self, cookies: dict, db_path: str | Path = 'ap.parquet', tmp: str = '', **kwargs):
         self.n_threads = psutil.cpu_count(logical=True)
         self.tld = self.determine_tld(cookies)
+        print(self.tld)
         self.drive_url = f'https://www.amazon.{self.tld}/drive/v1'
+        print(self.drive_url)
         self.cdproxy_url = self.determine_cdproxy(kwargs.pop('cdproxy_override', None))
+        print(self.cdproxy_url)
         self.thumb_url = f'https://thumbnails-photos.amazon.{self.tld}/v1/thumbnail'  # /{node_id}?ownerId={ap.root["ownerId"]}&viewBox={width}'
+        print(self.thumb_url)
         self.base_params = {
             'asset': 'ALL',
             'tempLink': 'false',
@@ -87,9 +91,12 @@ class AmazonPhotos:
         @return: top-level domain
         """
         for k, v in cookies.items():
+            print(k)
             if k.endswith('_main'):
                 return 'com'
-            if k.startswith(x := 'at-acb'):
+            elif k == 'at-acbjp':
+                return 'co.jp'
+            elif k.startswith(x := 'at-acb'):
                 return k.split(x)[-1]
 
     def determine_cdproxy(self, override: str = None):
@@ -103,10 +110,12 @@ class AmazonPhotos:
         # EU variant? https://content-eu.drive.amazonaws.com/v2/upload
         if override:
             return override
-        if self.tld in NORTH_AMERICA_TLD_MAP:
+        elif self.tld in NORTH_AMERICA_TLD_MAP:
             return 'https://content-na.drive.amazonaws.com/cdproxy/nodes'
         elif self.tld in EUROPEAN_TLD_MAP:
-            return f'https://content-eu.drive.amazonaws.com/cdproxy/nodes'
+            return 'https://content-eu.drive.amazonaws.com/cdproxy/nodes'
+        elif self.tld == 'co.jp':
+            return 'https://content-jp.drive.amazonaws.com/cdproxy/nodes'
 
     async def process(self, fns: Generator, max_connections: int = None, **kwargs):
         """
