@@ -47,13 +47,9 @@ class AmazonPhotos:
     def __init__(self, cookies: dict, db_path: str | Path = 'ap.parquet', tmp: str = '', **kwargs):
         self.n_threads = psutil.cpu_count(logical=True)
         self.tld = self.determine_tld(cookies)
-        print(self.tld)
         self.drive_url = f'https://www.amazon.{self.tld}/drive/v1'
-        print(self.drive_url)
         self.cdproxy_url = self.determine_cdproxy(kwargs.pop('cdproxy_override', None))
-        print(self.cdproxy_url)
         self.thumb_url = f'https://thumbnails-photos.amazon.{self.tld}/v1/thumbnail'  # /{node_id}?ownerId={ap.root["ownerId"]}&viewBox={width}'
-        print(self.thumb_url)
         self.base_params = {
             'asset': 'ALL',
             'tempLink': 'false',
@@ -91,7 +87,6 @@ class AmazonPhotos:
         @return: top-level domain
         """
         for k, v in cookies.items():
-            print(k)
             if k.endswith('_main'):
                 return 'com'
             elif k == 'at-acbjp':
